@@ -1,0 +1,31 @@
+
+// ===== Lire Base64 depuis LoRaWAN =====
+let raw = msg.payload.frmPayload;
+
+if (!raw) {
+    node.warn("Pas de frmPayload !");
+    return null;
+}
+
+// ===== Décoder base64 → texte =====
+let decoded = Buffer.from(raw, 'base64').toString('utf8').trim();
+
+// ===== Extraire temp et hum =====
+let match = decoded.match(/temp=([0-9.]+)&hum=([0-9.]+)/);
+
+if (!match) {
+    node.warn("Format incorrect");
+    return null;
+}
+
+let temp = parseFloat(match[1]);
+let hum  = parseFloat(match[2]);
+
+// ===== Message final =====
+msg.payload = {
+    temperature: temp,
+    humidity: hum,
+    display: "TEM : " + temp + "°C   HUM : " + hum + "%"
+};
+
+return msg;
